@@ -61,10 +61,12 @@ async def check_upload():
     channel = client.get_channel(DISCORD_CHANNEL_ID)
 
     if channel is None:
-        print("알림 채널을 찾지 못했습니다!")
+        print("❌ 디스코드 알림 채널을 찾지 못했습니다!")
         return
 
     while not client.is_closed():
+        print("📡 [업로드 체크] 유튜브 API 요청 중...")
+
         request = youtube.search().list(
             part='snippet',
             channelId=YOUTUBE_CHANNEL_ID,
@@ -75,6 +77,8 @@ async def check_upload():
         response = request.execute()
         items = response.get('items', [])
 
+        print(f"📦 응답 받은 영상 수: {len(items)}")
+
         if items:
             video = items[0]
             video_id = video['id']['videoId']
@@ -82,13 +86,22 @@ async def check_upload():
             channel_title = video['snippet']['channelTitle']
             video_url = f'https://www.youtube.com/watch?v={video_id}'
 
-            # 라이브 알림과 중복 안되게 체크
+            print("🎞 영상 ID:", video_id)
+            print("📌 영상 제목:", title)
+            print("📋 채널명:", channel_title)
+
             if video_id != last_upload_video_id and video_id != last_live_video_id:
+                print("✅ 새 영상 감지됨, 알림 전송!")
                 last_upload_video_id = video_id
                 msg = f'🎬 **새 영상 업로드!**\n유튜버: **{channel_title}**\n제목: {title}\n링크: {video_url}'
                 await channel.send(msg)
+            else:
+                print("🔁 이미 감지된 영상입니다. 건너뜀.")
+        else:
+            print("🚫 유튜브 API 결과에 영상이 없습니다.")
 
-        await asyncio.sleep(300)  # 5분마다 확인
+        await asyncio.sleep(300)
+
 
 @client.event
 async def on_ready():
