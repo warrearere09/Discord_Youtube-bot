@@ -93,8 +93,9 @@ async def check_upload():
             if video_id != last_upload_video_id and video_id != last_live_video_id:
                 print("✅ 새 영상 감지됨, 알림 전송!")
                 last_upload_video_id = video_id
-                msg = f'🎬 **새 영상이 업로드 되었습니다.\n{video_url}'
+                msg = f'새 동영상이 업로드 되었습니다.\n{video_url}'
                 await channel.send(msg)
+
             else:
                 print("🔁 이미 감지된 영상입니다. 건너뜀.")
         else:
